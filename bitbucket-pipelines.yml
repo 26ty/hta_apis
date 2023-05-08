@@ -1,0 +1,21 @@
+image: golang:1.17
+
+pipelines:
+  branches:
+    devlop:
+      - step:
+          name: build and deploy - authority
+          script:
+            - apt-get update && apt-get install -y zip
+            - mkdir deploy
+            - GOOS=linux GOARCH=amd64 go build -o deploy/authority cmd/authority/authority.go
+            - zip -D -j -r deploy/authority.zip deploy/authority
+            - rm -rf  /opt/atlassian/pipelines/agent/build/.bitbucket/pipelines/generated/pipeline/pipes
+            - pipe: atlassian/aws-lambda-deploy:1.3.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+                AWS_DEFAULT_REGION: 'ap-southeast-1'
+                FUNCTION_NAME: 'eirc-testing-authority'
+                COMMAND: 'update'
+                ZIP_FILE: 'deploy/authority.zip'

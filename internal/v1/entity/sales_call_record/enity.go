@@ -1,0 +1,33 @@
+package sales_call_record
+
+import (
+	model "eirc.app/internal/v1/structure/sales_call_records"
+	"gorm.io/gorm"
+)
+
+type Entity interface {
+	WithTrx(tx *gorm.DB) Entity
+	Created(input *model.Table) (err error)
+	List(input *model.Fields) (amount int64, output []*model.Table, err error)
+	GetByID(input *model.Field) (output *model.Table, err error)
+	Deleted(input *model.Table) (err error)
+	Updated(input *model.Table) (err error)
+	AccountList(input *model.Fields) (amount int64, output []*model.SalesCallRecord_Account, err error)
+	GetBySIDAccount(input *model.Field) (output *model.SalesCallRecord_Account, err error)
+}
+
+type entity struct {
+	db *gorm.DB
+}
+
+func New(db *gorm.DB) Entity {
+	return &entity{
+		db: db,
+	}
+}
+
+func (e *entity) WithTrx(tx *gorm.DB) Entity {
+	return &entity{
+		db: tx,
+	}
+}
